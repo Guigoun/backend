@@ -1,12 +1,12 @@
 const express = require("express");
-
+const validarToken = require('../middllewares/auth');
 const controllerProdutos = require("../controllers/controller_produto");
 
 const router = express.Router();
 
 router.post("/", controllerProdutos.validar, controllerProdutos.criar);
 
-router.get("/", controllerProdutos.listar);
+router.get("/", validarToken, controllerProdutos.listar);
 
 router.get(
   "/:id",
