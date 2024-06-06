@@ -25,7 +25,7 @@ async function entrar(req, res) {
         const senhaCifrada = cifrarSenha(req.body.senha,
              usuario.salt );
         if (senhaCifrada === usuario.senha) {
-            res.json({ token: jwt.sign({email: usuario.email}, '12345678', {
+            res.json({ token: jwt.sign({email: usuario.email}, process.env.SEGREDO, {
                 expiresIn: "1m",
             }),
          });
@@ -37,4 +37,21 @@ async function entrar(req, res) {
      }
 }
 
-module.exports = { criar, entrar };
+function renovar (req, res) {
+    const token = req.headers["authorization"];
+    if (token) {
+        try {
+            const payload = jwt.verify(token, process.env.SEGREDO);
+            return res.json({token: jwt.sign({ email: payload.email}, process.env.SEGREDO, {
+                expireIn: '2m',
+            }),
+        });
+        } catch (err) {
+            res.status(401).json({msg: "token inválido"});
+        }
+    } else {
+        res.status(400).json({msg: "Token não encontrado"})
+    }
+}
+
+module.exports = { criar, entrar, renovar };
